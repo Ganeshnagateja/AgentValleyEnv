@@ -1,0 +1,51 @@
+{
+  "best_reward": 29.42,
+  "generated_from": [
+    "artifacts/q_learning/metrics.jsonl",
+    "artifacts/neural_policy/metrics.jsonl",
+    "artifacts/grpo/metrics.jsonl",
+    "artifacts/multi_agent_grpo/metrics.jsonl"
+  ],
+  "latest_final_status": "valley_collapsed",
+  "latest_policy_loss": -0.033449,
+  "latest_reward": 27.69,
+  "latest_task_score": 0.305,
+  "modes": {
+    "grpo": {
+      "best_reward": 4.26,
+      "latest_checkpoint_path": "artifacts/grpo/policy.pt",
+      "latest_final_status": "valley_collapsed",
+      "latest_metrics_path": "artifacts/grpo/metrics.jsonl",
+      "latest_policy_loss": 0.0,
+      "latest_reward": 1.31,
+      "latest_task_score": 0.5143
+    },
+    "multi_agent_grpo": {
+      "best_reward": 29.42,
+      "latest_checkpoint_path": "artifacts/multi_agent_grpo",
+      "latest_final_status": "valley_collapsed",
+      "latest_metrics_path": "artifacts/multi_agent_grpo/metrics.jsonl",
+      "latest_policy_loss": -0.033449,
+      "latest_reward": 27.69,
+      "latest_task_score": 0.305
+    },
+    "neural_policy": {
+      "best_reward": 0.29,
+      "latest_checkpoint_path": "artifacts/neural_policy/policy.pt",
+      "latest_final_status": "valley_collapsed",
+      "latest_metrics_path": "artifacts/neural_policy/metrics.jsonl",
+      "latest_policy_loss": 0.098082,
+      "latest_reward": -2.64,
+      "latest_task_score": 0.194
+    },
+    "q_learning": {
+      "best_reward": 0.83,
+      "latest_checkpoint_path": "artifacts/q_learning/q_table.json",
+      "latest_final_status": "valley_collapsed",
+      "latest_metrics_path": "artifacts/q_learning/metrics.jsonl",
+      "latest_policy_loss": null,
+      "latest_reward": 0.83,
+      "latest_task_score": 0.5048
+    }
+  }
+}

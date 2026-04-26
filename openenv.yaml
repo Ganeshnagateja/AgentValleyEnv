@@ -1,0 +1,260 @@
+name: MultiAgentValleyEnv
+version: 1.0.0
+description: Four-agent cooperative valley survival environment with partial observability,
+  shared resources, role incentives, and verifiable rewards.
+category: multi-agent-rl
+tags:
+- openenv
+- multi-agent
+- cooperation
+- rlvr
+- grpo
+- q-learning
+motivation: 'Agent Valley targets Theme #1: Multi-Agent Interactions. Four specialized
+  agents must coordinate resource production, mining, construction, and defense under
+  partial observability. The environment rewards coalition-like division of labor
+  and penalizes selfish pile-on behavior, making it useful for training agents to
+  reason about cooperation, competition, shared resources, and team survival.
+
+  '
+entrypoint: env.multi_agent_env:MultiAgentValleyEnv
+observation_type: dict
+action_type: dict
+reward_type: dict
+info_type: dict
+agents:
+- id: farmer
+  role: food_producer
+  home_region: farmland
+  preferred_action: gather
+  preferred_focus: food
+  preferred_cooperation: share
+- id: miner
+  role: resource_extractor
+  home_region: mine
+  preferred_action: gather
+  preferred_focus: ore
+  preferred_cooperation: coordinate
+- id: builder
+  role: infrastructure
+  home_region: village
+  preferred_action: build
+  preferred_focus: stone
+  preferred_cooperation: coordinate
+- id: warrior
+  role: defense
+  home_region: wilderness
+  preferred_action: defend
+  preferred_focus: none
+  preferred_cooperation: protect
+tasks:
+- id: task_easy
+  name: Resource Stabilization
+  difficulty: easy
+  max_steps: 5
+  dataset: datasets/easy.json
+  grader: env.graders.grade_episode
+  description: Four simultaneous agents resolve short-horizon resource and rest decisions
+    before the settlement destabilizes.
+- id: task_medium
+  name: Market Shock Coordination
+  difficulty: medium
+  max_steps: 7
+  dataset: datasets/medium.json
+  grader: env.graders.grade_episode
+  description: Four simultaneous agents coordinate through market volatility, scarcity,
+    and moderate external events.
+- id: task_hard
+  name: Invasion Defense and Recovery
+  difficulty: hard
+  max_steps: 10
+  dataset: datasets/hard.json
+  grader: env.graders.grade_episode
+  description: Four simultaneous agents balance defense, recovery, and resource routing
+    during long-horizon valley crises.
+interface:
+  entry_class: env.multi_agent_env.MultiAgentValleyEnv
+  compatibility_class: env.environment.AgentValleyEnv
+  required_methods:
+  - reset
+  - step
+  - state
+  observation_type: dict
+  action_type: dict
+  reward_type: dict
+  done_type: dict
+action_schema:
+  type: object
+  description: Nested multi-agent action map. Keys are agent IDs and values are composite
+    Agent Valley actions.
+  required:
+  - farmer
+  - miner
+  - builder
+  - warrior
+  additionalProperties: false
+  properties:
+    farmer:
+      $ref: '#/definitions/agent_action'
+    miner:
+      $ref: '#/definitions/agent_action'
+    builder:
+      $ref: '#/definitions/agent_action'
+    warrior:
+      $ref: '#/definitions/agent_action'
+definitions:
+  agent_action:
+    type: object
+    description: Single agent composite action.
+    required:
+    - primary_action
+    - focus_resource
+    - cooperation_mode
+    - risk_posture
+    - rationale
+    additionalProperties: false
+    properties:
+      primary_action:
+        type: string
+        enum:
+        - gather
+        - trade
+        - build
+        - explore
+        - rest
+        - cooperate
+        - compete
+        - defend
+      focus_resource:
+        type: string
+        enum:
+        - none
+        - food
+        - wood
+        - stone
+        - gold
+        - ore
+      cooperation_mode:
+        type: string
+        enum:
+        - solo
+        - share
+        - coordinate
+        - protect
+      risk_posture:
+        type: string
+        enum:
+        - cautious
+        - balanced
+        - aggressive
+      rationale:
+        type: string
+        minLength: 1
+        maxLength: 512
+examples:
+  sample_action:
+    description: Valid simultaneous four-agent action for MultiAgentValleyEnv.step().
+    value:
+      farmer:
+        primary_action: gather
+        focus_resource: food
+        cooperation_mode: share
+        risk_posture: balanced
+        rationale: Farmer gathers food and shares surplus.
+      miner:
+        primary_action: gather
+        focus_resource: ore
+        cooperation_mode: coordinate
+        risk_posture: balanced
+        rationale: Miner coordinates ore extraction.
+      builder:
+        primary_action: build
+        focus_resource: wood
+        cooperation_mode: coordinate
+        risk_posture: cautious
+        rationale: Builder uses wood to improve shared defenses.
+      warrior:
+        primary_action: defend
+        focus_resource: none
+        cooperation_mode: protect
+        risk_posture: balanced
+        rationale: Warrior protects the valley from threats.
+reward:
+  type: dense_multi_agent
+  range:
+  - -1.0
+  - 1.0
+  components:
+  - name: progress_reward
+    description: Base benchmark reward for moving through a valid episode.
+  - name: objective_bonus
+    description: Base benchmark reward for selecting useful valley actions.
+  - name: focus_bonus
+    description: Base benchmark reward for targeting scarce resources.
+  - name: role_reward
+    description: Per-agent reward for role-appropriate action, resource focus, and
+      cooperation mode.
+  - name: cooperation_bonus
+    description: Shared bonus for complementary simultaneous actions and role coordination.
+  - name: conflict_penalty
+    description: Shared penalty for pile-on actions, unsafe warrior behavior, or ignoring
+      starvation risk.
+  - name: safety_penalty
+    description: Penalty for reckless actions under threat, low health, or low energy.
+  - name: loop_penalty
+    description: Penalty for repeated identical actions instead of state-responsive
+      behavior.
+  - name: format_penalty
+    description: Penalty for missing rationale or hidden-answer leakage terms.
+anti_hacking:
+  extra_action_fields: forbidden
+  hidden_ground_truth: excluded_from_observation
+  loop_detection: true
+  safety_constraints: true
+  rationale_leakage_terms_blocked: true
+  multi_agent_reward_breakdown: true
+training:
+  single_agent_modes:
+  - q_learning
+  - neural_policy
+  - grpo
+  multi_agent_modes:
+  - multi_agent_grpo
+  metrics:
+  - artifacts/q_learning/metrics.jsonl
+  - artifacts/neural_policy/metrics.jsonl
+  - artifacts/grpo/metrics.jsonl
+  - artifacts/multi_agent_grpo/metrics.jsonl
+  plots:
+  - assets/reward_curve.png
+  - assets/loss_curve.png
+runtime:
+  python: '>=3.10'
+  dependencies_file: requirements.txt
+  server: python -m server.app
+  docker_image: agent-valley:latest
+baseline_scores:
+  easy: 0.4816
+  medium: 0.4657
+  hard: 0.505
+  average: 0.4841
+training_evidence:
+  best_reward: 29.42
+  latest_multi_agent_reward: 27.69
+  best_multi_agent_task_score: 0.9175
+  best_observed_status: valley_stabilized
+  metrics:
+  - artifacts/q_learning/metrics.jsonl
+  - artifacts/neural_policy/metrics.jsonl
+  - artifacts/grpo/metrics.jsonl
+  - artifacts/multi_agent_grpo/metrics.jsonl
+  plots:
+  - assets/reward_curve.png
+  - assets/loss_curve.png
+  summary: assets/training_summary.json
+reproducibility:
+  deterministic: true
+  seed_parameter: seed
+  baseline_script: baseline_eval.py
+  inference_script: inference.py
+  plot_script: scripts/generate_training_plots.py

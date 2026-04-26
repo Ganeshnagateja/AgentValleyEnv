@@ -1,0 +1,9 @@
+.reference
+.dist
+app/node_modules
+app/.vite
+__pycache__
+*.pyc
+.git
+.venv
+venv
