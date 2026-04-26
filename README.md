@@ -1,11 +1,12 @@
 ---
-license: mit
-title: AgentValleyEnv
+title: Agent Valley
+emoji: 🧠
+colorFrom: yellow
+colorTo: green
 sdk: docker
-emoji: landscape
-colorFrom: green
-colorTo: blue
+app_port: 7860
 pinned: false
+license: mit
 tags:
   - openenv
   - multi-agent
